@@ -125,7 +125,8 @@ svg .hot{transform-box:fill-box;transform-origin:center}
 .embed.on{display:block}
 .embed iframe{display:block;width:100%;height:152px;border:0;border-radius:12px}
 .live-back{display:none;margin-top:8px;font-family:var(--lcd);font-size:16px;color:#7dff8a;background:none;border:0;padding:0}
-.live-back.on{display:inline-block}
+.live-back.on{display:inline-block;margin-right:14px}
+#syncBtn{color:#ffcf5a}
 
 /* modal */
 .modal{position:fixed;inset:0;z-index:70;display:none;align-items:center;justify-content:center;background:rgba(10,7,4,.55);padding:20px}
@@ -449,6 +450,7 @@ svg .hot{transform-box:fill-box;transform-origin:center}
     </div>
   </div>
   <button class="live-back" id="liveBack">● back to live</button>
+  <button class="live-back" id="syncBtn">↻ new track on my Spotify — load it</button>
   <div class="embed" id="embed"></div>
 </div>
 
@@ -692,7 +694,9 @@ function render() {
   $('#dkOpen').href = c && c.url ? c.url : 'https://open.spotify.com';
   $('#lcd').textContent = c ? `${spinning ? '▶' : '❚❚'} ${c.title.toUpperCase()} — ${c.artist.toUpperCase()}${picked ? '' : (live && live.playing ? '  ·  LIVE' : '  ·  LAST PLAYED')}` : 'NO SIGNAL — pick a record from the crate';
   $('#liveBack').classList.toggle('on', !!(picked && live));
-  if (embedOpen) setEmbed(true);
+  // never reload an open player on its own: that cuts off whatever is playing
+  const f = $('#embed iframe');
+  $('#syncBtn').classList.toggle('on', !!(embedOpen && f && f.dataset.src !== trackEmbed(cur())));
 }
 function setEmbed(on) {
   embedOpen = on; const box = $('#embed'), src = trackEmbed(cur());
@@ -708,10 +712,11 @@ function pickAlbum(i, quiet) {
   if (!quiet) { toast(`now spinning: ${a.title} — ${a.artist}`); setEmbed(true); }
   render();
 }
-$('#dkPlay').onclick = () => { if (!cur()) { openModal('crate'); return; } setEmbed(!embedOpen); };
+$('#dkPlay').onclick = () => { if (!cur()) { openModal('crate'); return; } setEmbed(!embedOpen); if (embedOpen) toast('tap ▶ inside the Spotify player'); };
+$('#syncBtn').onclick = () => { setEmbed(true); render(); };
 $('#dkCrate').onclick = () => openModal('crate');
-$('#liveBack').onclick = () => { picked = null; render(); toast('back to live ●'); };
-$('#tt').addEventListener('click', () => { hideHint(); if (!cur()) { openModal('crate'); return; } setEmbed(!embedOpen); toast(embedOpen ? 'needle drop ✦ hit play on the player' : 'needle up'); });
+$('#liveBack').onclick = () => { picked = null; if (embedOpen) setEmbed(true); render(); toast('back to live ●'); };
+$('#tt').addEventListener('click', () => { hideHint(); if (!cur()) { openModal('crate'); return; } setEmbed(!embedOpen); toast(embedOpen ? 'needle drop ✦ tap ▶ inside the Spotify player' : 'needle up'); });
 $('#tt').addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); $('#tt').click(); } });
 
 async function poll() {
