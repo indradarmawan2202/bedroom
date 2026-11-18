@@ -11,11 +11,10 @@ Interactive bedroom portfolio of **Muhammad Indra Darmawan**, Fullstack Develope
 | Rak buku | Skills |
 | Konsol 8-bit + TV | Experience ("save files") |
 | Flip phone di lantai | Kontak |
-| Turntable | Lagu yang sedang kuputar di Spotify (live) |
-| Rak piringan / crate | Pilih album → diputar di turntable (Spotify embed) |
+| Turntable / rak piringan / crate | Pengunjung memilih musik sendiri: ambil album dari crate atau paste link Spotify apa saja (lagu, album, playlist) → diputar lewat Spotify embed |
 | Lava lamp | Mode malam |
 
-Satu file `index.html` (HTML/CSS/JS + SVG), tanpa framework dan tanpa build step. Turntable mengambil data dari Cloudflare Worker `spotify-now` yang sama dengan [situs utama](https://indradarmawan2202.github.io/).
+Satu file `index.html` (HTML/CSS/JS + SVG), tanpa framework dan tanpa build step. Tidak butuh API key: musik diputar lewat Spotify embed, sedangkan judul dan cover untuk link yang di-paste diambil dari Spotify oEmbed.
 
 ## Edit
 - **Album di crate:** array `ALBUMS` di `<script>` (album ID + hash gambar cover Spotify).

@@ -6,7 +6,7 @@
 <title>Indra's Room — Muhammad Indra Darmawan</title>
 <meta name="description" content="Step into Indra's bedroom: an interactive portfolio of Muhammad Indra Darmawan, Fullstack Developer & AI Engineer from Surabaya. Everything in the room is clickable.">
 <meta property="og:title" content="Indra's Room">
-<meta property="og:description" content="An interactive bedroom portfolio — posters are projects, the turntable is live on Spotify.">
+<meta property="og:description" content="An interactive bedroom portfolio — posters are projects, and you pick the records on the turntable.">
 <meta name="theme-color" content="#1a1512">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%23111'/%3E%3Ccircle cx='32' cy='32' r='22' fill='none' stroke='%23333' stroke-width='2'/%3E%3Ccircle cx='32' cy='32' r='11' fill='%23d8352a'/%3E%3Ccircle cx='32' cy='32' r='2.5' fill='%23111'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -124,9 +124,6 @@ svg .hot{transform-box:fill-box;transform-origin:center}
 .embed{display:none;margin-top:10px}
 .embed.on{display:block}
 .embed iframe{display:block;width:100%;height:152px;border:0;border-radius:12px}
-.live-back{display:none;margin-top:8px;font-family:var(--lcd);font-size:16px;color:#7dff8a;background:none;border:0;padding:0}
-.live-back.on{display:inline-block;margin-right:14px}
-#syncBtn{color:#ffcf5a}
 
 /* modal */
 .modal{position:fixed;inset:0;z-index:70;display:none;align-items:center;justify-content:center;background:rgba(10,7,4,.55);padding:20px}
@@ -155,6 +152,10 @@ svg .hot{transform-box:fill-box;transform-origin:center}
 .lvl{border:2px dashed #b9b1a1;padding:10px 12px;margin-bottom:10px;background:rgba(255,255,255,.6)}
 .lvl b{font-family:var(--lcd);font-size:20px;color:var(--red);display:block;line-height:1}
 .lvl .st{font-family:var(--lcd);font-size:17px;color:#2b8a3e}
+.linkf{display:flex;gap:8px;margin:4px 0 18px}
+.linkf input{flex:1;min-width:0;font-family:var(--sans);font-size:14px;padding:10px 12px;border:2px solid var(--ink);background:#fff;box-shadow:3px 3px 0 var(--ink);outline:none}
+.linkf input:focus{background:#fffbe0}
+.linkf button{font-family:var(--sans);font-weight:700;font-size:14px;border:2px solid var(--ink);background:#1db954;color:#06200f;padding:0 14px;box-shadow:3px 3px 0 var(--ink)}
 .crate{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:14px;margin-top:8px}
 .sleeve{border:0;background:none;padding:0;text-align:left;font-family:var(--sans)}
 .sleeve .s-img{position:relative;aspect-ratio:1;background:#222;box-shadow:3px 4px 0 rgba(0,0,0,.25);transition:transform .25s cubic-bezier(.3,1.5,.4,1)}
@@ -423,13 +424,13 @@ svg .hot{transform-box:fill-box;transform-origin:center}
 </svg>
 
 <!-- TURNTABLE -->
-<div class="tt hot" id="tt" tabindex="0" role="button" aria-label="Turntable — now playing">
+<div class="tt hot" id="tt" tabindex="0" role="button" aria-label="Turntable — play a record">
   <div class="tt-top"><div class="plinth">
     <div class="platter"><div class="vinyl" id="vinyl"><div class="label"><img id="labelImg" alt=""><i></i></div></div></div>
     <div class="arm" id="arm"><i class="pv"></i><i class="rod"></i><i class="hd"></i></div>
     <i class="knob k1"></i><i class="knob k2"></i><span class="rpm">33⅓</span>
   </div></div>
-  <div class="tt-front"><div class="lcd"><span id="lcd">NO SIGNAL — pick a record from the crate</span></div><i class="led" id="led"></i></div>
+  <div class="tt-front"><div class="lcd"><span id="lcd">NO RECORD — pick one from the crate</span></div><i class="led" id="led"></i></div>
 </div>
 </div>
 </div>
@@ -439,18 +440,17 @@ svg .hot{transform-box:fill-box;transform-origin:center}
   <div class="dk">
     <div class="dk-cv" id="dkCv"><img id="dkImg" alt=""></div>
     <div class="dk-meta">
-      <div class="dk-tag" id="dkTag">◌ tuning in…</div>
+      <div class="dk-tag" id="dkTag">◌ turntable idle</div>
       <div class="dk-t" id="dkT">Indra's turntable</div>
-      <div class="dk-a" id="dkA">checking Spotify</div>
+      <div class="dk-a" id="dkA">pick a record, or paste any Spotify link</div>
     </div>
     <div class="dk-b">
       <button class="pri" id="dkPlay">▶ play</button>
       <a id="dkOpen" class="hide-m" target="_blank" rel="noopener" href="https://open.spotify.com">↗</a>
+      <button id="dkEject" title="Eject" aria-label="Eject record">⏏</button>
       <button id="dkCrate">crate</button>
     </div>
   </div>
-  <button class="live-back" id="liveBack">● back to live</button>
-  <button class="live-back" id="syncBtn">↻ new track on my Spotify — load it</button>
   <div class="embed" id="embed"></div>
 </div>
 
@@ -460,7 +460,6 @@ svg .hot{transform-box:fill-box;transform-origin:center}
 
 <script>
 /* ============ CONFIG ============ */
-const SPOTIFY_NOW = 'https://spotify-now.indra220205.workers.dev';
 const ALBUMS = [
   ['Arctic Monkeys','AM','78bpIziExqiI9qztvNFlQu','4ae1c4c5c45aabe565499163'],
   ['Pierce The Veil','Selfish Machines','5j53HGspZrUT5nXmVAUAsN','3566e4014e1398e7b279d772'],
@@ -593,9 +592,10 @@ const P = {
     <div class="btns"><a href="mailto:${LINKS.email}">${LINKS.email}</a><button id="copyMail">copy email</button></div>
     <div class="btns" style="margin-top:12px"><a href="${LINKS.github}" target="_blank" rel="noopener">GitHub ↗</a><a href="${LINKS.linkedin}" target="_blank" rel="noopener">LinkedIn ↗</a></div>`,
   crate: () => `<h2>the <em>crate</em></h2><p class="sub">pick a record → it goes on the turntable</p>
+    <form id="linkForm" class="linkf"><input name="link" type="text" inputmode="url" autocomplete="off" placeholder="…or paste any Spotify link (song, album, playlist)" aria-label="Spotify link"><button type="submit">spin it</button></form>
     <div class="crate">${ALBUMS.map((a, i) => `<button class="sleeve" data-pick="${i}"><div class="s-img"><img src="${a.cover}" alt="" loading="lazy"></div><b>${esc(a.title)}</b><span>${esc(a.artist)}</span></button>`).join('')}</div>`,
   guide: () => `<h2>what can i <em>click?</em></h2><p class="sub">basically everything, but here's the map</p>
-    <ul><li><b>gig poster / diary</b> — about me</li><li><b>other posters &amp; flyers</b> — projects</li><li><b>bookshelf</b> — skills</li><li><b>8-bit console</b> — experience</li><li><b>flip phone</b> — contact</li><li><b>turntable</b> — live from my Spotify</li><li><b>records</b> — pick an album</li><li><b>lava lamp</b> — lights on / off</li></ul>
+    <ul><li><b>gig poster / diary</b> — about me</li><li><b>other posters &amp; flyers</b> — projects</li><li><b>bookshelf</b> — skills</li><li><b>8-bit console</b> — experience</li><li><b>flip phone</b> — contact</li><li><b>turntable / records</b> — pick an album, or paste any Spotify link</li><li><b>lava lamp</b> — lights on / off</li></ul>
     <div class="btns">${['about', 'qg', 'eaqe', 'skills', 'exp', 'contact', 'crate'].map(k => `<button data-goto="${k}">${{ about: 'about', qg: 'question gen', eaqe: 'EAQE', skills: 'skills', exp: 'experience', contact: 'contact', crate: 'records' }[k]}</button>`).join('')}</div>`
 };
 const modal = $('#modal'), sheet = $('#sheet');
@@ -672,31 +672,23 @@ const vp = $('#vp');
 function centerPan() { if (vp.scrollWidth > vp.clientWidth) vp.scrollLeft = vp.scrollWidth * .57 - vp.clientWidth / 2; }
 requestAnimationFrame(() => { centerPan(); setTimeout(() => vp.addEventListener('scroll', hideHint, { passive: true }), 400); });
 
-/* ---------- TURNTABLE + SPOTIFY ---------- */
-let live = null, picked = null, embedOpen = false;
-const cur = () => picked || live;
-function trackEmbed(c) {
-  if (!c) return '';
-  if (c.kind === 'album') return `https://open.spotify.com/embed/album/${c.id}?utm_source=generator&theme=0`;
-  const m = (c.url || '').match(/track\/([A-Za-z0-9]+)/); return m ? `https://open.spotify.com/embed/track/${m[1]}?utm_source=generator&theme=0` : '';
-}
+/* ---------- TURNTABLE + SPOTIFY (visitor picks the music) ---------- */
+let picked = null, embedOpen = false;
+const cur = () => picked;
+function trackEmbed(c) { return c ? `https://open.spotify.com/embed/${c.kind}/${c.id}?utm_source=generator&theme=0` : ''; }
 function render() {
-  const c = cur(), spinning = !!(picked || (live && live.playing));
+  const c = cur(), spinning = !!c;
   $('#vinyl').classList.toggle('on', spinning); $('#arm').classList.toggle('on', spinning); $('#led').classList.toggle('on', spinning);
   $('#dkCv').classList.toggle('on', spinning);
+  $('#labelImg').style.visibility = c && c.cover ? 'visible' : 'hidden'; $('#dkImg').style.visibility = c && c.cover ? 'visible' : 'hidden';
   if (c && c.cover) { $('#labelImg').src = c.cover; $('#dkImg').src = c.cover; }
   const tag = $('#dkTag');
-  if (picked) { tag.textContent = '◆ from the crate'; tag.classList.add('pk'); }
-  else if (live) { tag.textContent = live.playing ? '● LIVE · on my Spotify' : '◌ last played'; tag.classList.remove('pk'); }
-  else { tag.textContent = '◌ turntable idle'; tag.classList.remove('pk'); }
+  tag.textContent = c ? (c.fromLink ? '◆ your pick' : '◆ from the crate') : '◌ turntable idle'; tag.classList.toggle('pk', !!c);
   $('#dkT').textContent = c ? c.title : 'nothing spinning';
-  $('#dkA').textContent = c ? c.artist : 'pick a record from the crate';
-  $('#dkOpen').href = c && c.url ? c.url : 'https://open.spotify.com';
-  $('#lcd').textContent = c ? `${spinning ? '▶' : '❚❚'} ${c.title.toUpperCase()} — ${c.artist.toUpperCase()}${picked ? '' : (live && live.playing ? '  ·  LIVE' : '  ·  LAST PLAYED')}` : 'NO SIGNAL — pick a record from the crate';
-  $('#liveBack').classList.toggle('on', !!(picked && live));
-  // never reload an open player on its own: that cuts off whatever is playing
-  const f = $('#embed iframe');
-  $('#syncBtn').classList.toggle('on', !!(embedOpen && f && f.dataset.src !== trackEmbed(cur())));
+  $('#dkA').textContent = c ? c.artist : 'pick a record, or paste any Spotify link';
+  $('#dkOpen').href = c ? c.url : 'https://open.spotify.com';
+  $('#dkEject').style.display = c ? '' : 'none';
+  $('#lcd').textContent = c ? `▶ ${c.title.toUpperCase()} — ${c.artist.toUpperCase()}` : 'NO RECORD — pick one from the crate';
 }
 function setEmbed(on) {
   embedOpen = on; const box = $('#embed'), src = trackEmbed(cur());
@@ -706,28 +698,40 @@ function setEmbed(on) {
     box.classList.add('on'); $('#dkPlay').textContent = '✕ hide';
   } else { box.classList.remove('on'); box.innerHTML = ''; embedOpen = false; $('#dkPlay').textContent = '▶ play'; }
 }
-function pickAlbum(i, quiet) {
-  const a = ALBUMS[i]; picked = { kind: 'album', ...a };
-  $('#arm').classList.remove('on'); setTimeout(render, 250);
-  if (!quiet) { toast(`now spinning: ${a.title} — ${a.artist}`); setEmbed(true); }
-  render();
+function load(rec, quiet) {
+  picked = rec;
+  $('#arm').classList.remove('on'); setTimeout(render, 250); render();
+  if (!quiet) { setEmbed(true); toast(`needle drop: ${rec.title} ✦ tap ▶ inside the player`); }
 }
+function pickAlbum(i, quiet) { const a = ALBUMS[i]; load({ kind: 'album', ...a }, quiet); }
+
+// any Spotify link: track / album / playlist / artist / episode
+function parseSpotify(str) {
+  const m = String(str).trim().match(/(?:open\.spotify\.com\/(?:intl-[a-z-]+\/)?(?:embed\/)?|spotify:)(track|album|playlist|artist|episode|show)[\/:]([A-Za-z0-9]{22})/);
+  return m ? { kind: m[1], id: m[2] } : null;
+}
+async function loadLink(str) {
+  const p = parseSpotify(str);
+  if (!p) { toast('hmm, that doesn\'t look like a Spotify link'); return false; }
+  const url = `https://open.spotify.com/${p.kind}/${p.id}`;
+  const rec = { ...p, url, title: 'your pick', artist: `Spotify ${p.kind}`, cover: null, fromLink: true };
+  load(rec);
+  try { // title + cover via Spotify oEmbed (no API key needed)
+    const r = await fetch('https://open.spotify.com/oembed?url=' + encodeURIComponent(url));
+    if (r.ok) { const j = await r.json(); if (picked === rec) { rec.title = j.title || rec.title; rec.cover = j.thumbnail_url || null; render(); } }
+  } catch (e) {}
+  return true;
+}
+
 $('#dkPlay').onclick = () => { if (!cur()) { openModal('crate'); return; } setEmbed(!embedOpen); if (embedOpen) toast('tap ▶ inside the Spotify player'); };
-$('#syncBtn').onclick = () => { setEmbed(true); render(); };
 $('#dkCrate').onclick = () => openModal('crate');
-$('#liveBack').onclick = () => { picked = null; if (embedOpen) setEmbed(true); render(); toast('back to live ●'); };
+$('#dkEject').onclick = () => { picked = null; setEmbed(false); render(); toast('⏏ record ejected'); };
 $('#tt').addEventListener('click', () => { hideHint(); if (!cur()) { openModal('crate'); return; } setEmbed(!embedOpen); toast(embedOpen ? 'needle drop ✦ tap ▶ inside the Spotify player' : 'needle up'); });
 $('#tt').addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); $('#tt').click(); } });
-
-async function poll() {
-  try {
-    const r = await fetch(SPOTIFY_NOW, { cache: 'no-store' }); if (!r.ok) throw 0;
-    const j = await r.json();
-    live = j.title ? { kind: 'track', title: j.title, artist: j.artist, cover: j.cover, url: j.url, playing: !!j.playing } : null;
-  } catch (e) { live = live || null; }
-  render();
-}
-poll(); setInterval(poll, 30000);
+modal.addEventListener('submit', async e => {
+  if (e.target.id !== 'linkForm') return; e.preventDefault();
+  if (await loadLink(e.target.link.value)) closeModal();
+});
 render();
 })();
 </script>
