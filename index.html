@@ -714,7 +714,7 @@ async function loadLink(str) {
   const p = parseSpotify(str);
   if (!p) { toast('hmm, that doesn\'t look like a Spotify link'); return false; }
   const url = `https://open.spotify.com/${p.kind}/${p.id}`;
-  const rec = { ...p, url, title: 'your pick', artist: `Spotify ${p.kind}`, cover: null, fromLink: true };
+  const rec = { ...p, url, title: 'your pick', artist: `${p.kind} · via Spotify link`, cover: null, fromLink: true };
   load(rec);
   try { // title + cover via Spotify oEmbed (no API key needed)
     const r = await fetch('https://open.spotify.com/oembed?url=' + encodeURIComponent(url));
