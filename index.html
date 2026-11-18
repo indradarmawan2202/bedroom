@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Indra's Room — Muhammad Indra Darmawan</title>
+<meta name="description" content="Step into Indra's bedroom: an interactive portfolio of Muhammad Indra Darmawan, Fullstack Developer & AI Engineer from Surabaya. Everything in the room is clickable.">
+<meta property="og:title" content="Indra's Room">
+<meta property="og:description" content="An interactive bedroom portfolio — posters are projects, the turntable is live on Spotify.">
+<meta name="theme-color" content="#1a1512">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%23111'/%3E%3Ccircle cx='32' cy='32' r='22' fill='none' stroke='%23333' stroke-width='2'/%3E%3Ccircle cx='32' cy='32' r='11' fill='%23d8352a'/%3E%3Ccircle cx='32' cy='32' r='2.5' fill='%23111'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Permanent+Marker&family=Special+Elite&family=VT323&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --wall:#e6dccb; --red:#d8352a; --blue:#2f63c4; --ink:#1b1714; --paper:#f7f2e7;
+  --marker:"Permanent Marker",cursive; --poster:"Anton",Impact,sans-serif; --type:"Special Elite",monospace; --lcd:"VT323",monospace; --sans:"Space Grotesk",system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:#1a1512;overflow:hidden;font-family:var(--sans);color:var(--ink);-webkit-tap-highlight-color:transparent}
+button{font:inherit;color:inherit;cursor:pointer}
+
+/* ===== viewport & room ===== */
+.vp{position:fixed;inset:0;overflow:hidden}
+.room{position:absolute;left:50%;top:50%;width:max(100vw,160vh);height:max(62.5vw,100vh);transform:translate(-50%,-50%)}
+.scene{position:absolute;inset:0;width:100%;height:100%;display:block}
+.wall{fill:var(--wall);transition:fill .6s}
+/* flash-photo vibe */
+.room::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:20;
+  background:radial-gradient(ellipse 70% 65% at 50% 46%,rgba(255,236,200,.10),rgba(0,0,0,0) 55%,rgba(10,5,0,.45) 100%)}
+.grain{position:fixed;inset:-50%;z-index:60;pointer-events:none;opacity:.13;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 .9 0 0 0 0 .8 0 0 0 1.3 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation:grain 1s steps(4) infinite}
+@keyframes grain{25%{transform:translate(-2%,2%)}50%{transform:translate(2%,-2%)}75%{transform:translate(-1%,-2%)}}
+
+/* hotspots */
+.hot{cursor:pointer;outline:none;transition:filter .2s,transform .25s cubic-bezier(.3,1.5,.4,1)}
+.hot:hover,.hot:focus-visible{filter:drop-shadow(0 0 7px rgba(255,214,90,.95)) drop-shadow(0 0 2px rgba(255,214,90,1))}
+svg .hot{transform-box:fill-box;transform-origin:center}
+.wiggle{animation:wig .55s ease}
+@keyframes wig{25%{transform:rotate(-4deg)}50%{transform:rotate(3deg)}75%{transform:rotate(-1.5deg)}}
+.kickflip{animation:kick .8s cubic-bezier(.3,.7,.4,1)}
+@keyframes kick{40%{transform:translateY(-60px) rotate(200deg)}100%{transform:none}}
+.spin{animation:spin 1.6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* lava lamp blobs */
+.blob{transform-box:fill-box;transform-origin:center;animation:lava 9s ease-in-out infinite}
+.blob.b2{animation-duration:12s;animation-delay:-4s}.blob.b3{animation-duration:7s;animation-delay:-2s}.blob.b4{animation-duration:14s;animation-delay:-7s}
+@keyframes lava{0%,100%{transform:translateY(0) scale(1,1)}25%{transform:translateY(-26px) scale(.85,1.2)}50%{transform:translateY(-56px) scale(1.1,.9)}75%{transform:translateY(-20px) scale(.9,1.15)}}
+.crt-txt{animation:blinkt 1.1s steps(2) infinite}
+@keyframes blinkt{50%{opacity:0}}
+.robot-eye{animation:blinkt 3.6s steps(2) infinite}
+
+/* night mode */
+.night-dim{fill:#070a1f;opacity:0;transition:opacity .9s;pointer-events:none}
+.glow{opacity:0;transition:opacity .9s;pointer-events:none;mix-blend-mode:screen}
+.night .night-dim{opacity:.66}
+.night .glow{opacity:1}
+.bulb{transition:fill .6s}
+.night .bulb{filter:drop-shadow(0 0 6px currentColor)}
+.night .tt{filter:brightness(.5)}
+.night .lcd{filter:brightness(2)}
+
+/* ===== turntable (CSS 3D) ===== */
+.tt{position:absolute;left:49.2%;top:60.6%;width:16.6%;z-index:5;transition:filter .9s}
+.tt-top{position:relative;width:100%;aspect-ratio:1/.4;perspective:900px}
+.plinth{position:absolute;left:0;right:0;bottom:0;height:calc(100% / .4 * .78);transform-origin:bottom center;transform:rotateX(60deg);
+  border-radius:6px;background:linear-gradient(135deg,#7a5434,#4e321d 60%,#5d3d24);box-shadow:inset 0 0 0 3px rgba(255,255,255,.08),0 0 0 2px #2b1b10}
+.platter{position:absolute;left:6%;top:9%;height:82%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,#555 0 60%,#2c2c2c 61% 66%,#777 67% 70%,#222 71%)}
+.vinyl{position:absolute;inset:5%;border-radius:50%;background:repeating-radial-gradient(circle,#0d0d0d 0 1.5px,#1e1e1e 1.5px 3px);box-shadow:0 0 0 2px #000}
+.vinyl::before{content:"";position:absolute;inset:0;border-radius:50%;background:conic-gradient(from 20deg,transparent 0 10%,rgba(255,255,255,.12) 14%,transparent 18% 60%,rgba(255,255,255,.08) 64%,transparent 68%)}
+.vinyl.on{animation:spin 1.8s linear infinite}
+.label{position:absolute;inset:33%;border-radius:50%;overflow:hidden;background:var(--red)}
+.label img{width:100%;height:100%;object-fit:cover;display:block}
+.label i{position:absolute;left:50%;top:50%;width:9%;height:9%;margin:-4.5% 0 0 -4.5%;border-radius:50%;background:#111}
+.arm{position:absolute;right:9%;top:10%;width:6%;height:70%;transform-origin:50% 6%;transform:rotate(-4deg);transition:transform 1.2s cubic-bezier(.5,0,.3,1)}
+.arm.on{transform:rotate(23deg)}
+.arm .pv{position:absolute;left:-30%;top:0;width:160%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,#ddd,#888)}
+.arm .rod{position:absolute;left:38%;top:6%;width:24%;height:86%;background:linear-gradient(90deg,#999,#eee,#999);border-radius:3px}
+.arm .hd{position:absolute;left:0;bottom:0;width:100%;height:12%;background:#222;border-radius:2px}
+.knob{position:absolute;right:6%;width:7%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 35% 35%,#eee,#777)}
+.k1{bottom:10%}.k2{bottom:24%}
+.rpm{position:absolute;left:4%;bottom:3%;font-family:var(--lcd);color:#e9c88f;font-size:12px}
+.tt-front{position:relative;height:0;padding-bottom:13%;background:linear-gradient(#c9c4bb,#8f8a82);border-radius:0 0 6px 6px;box-shadow:0 10px 16px rgba(0,0,0,.45)}
+.lcd{position:absolute;left:6%;right:22%;top:20%;bottom:20%;background:#102012;border-radius:3px;overflow:hidden;box-shadow:inset 0 0 6px #000;display:flex;align-items:center}
+.lcd span{font-family:var(--lcd);color:#7dff8a;font-size:clamp(11px,1.15vw,20px);white-space:nowrap;padding-left:100%;animation:marq 12s linear infinite;text-shadow:0 0 6px rgba(125,255,138,.7)}
+@keyframes marq{to{transform:translateX(-100%)}}
+.led{position:absolute;right:9%;top:38%;width:4%;aspect-ratio:1;border-radius:50%;background:#400}
+.led.on{background:#ff3b2f;box-shadow:0 0 8px #ff3b2f}
+
+/* ===== UI ===== */
+.bar{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:40;display:flex;gap:8px;white-space:nowrap}
+.pill{border:0;border-radius:99px;background:#fbf7ee;padding:8px 14px 8px 9px;display:flex;align-items:center;gap:7px;font-weight:700;font-size:13.5px;
+  box-shadow:0 4px 14px rgba(0,0,0,.35);text-decoration:none;color:var(--ink);transition:transform .15s}
+.pill:hover{transform:translateY(-2px) rotate(-1deg)}
+.sw{width:18px;height:18px;border-radius:50%;box-shadow:inset 0 0 0 2px rgba(0,0,0,.15)}
+.pill .ic{width:18px;text-align:center;color:var(--red)}
+.short{display:none}
+
+.hint{position:fixed;left:50%;top:60px;transform:translateX(-50%);z-index:39;font-family:var(--marker);font-size:20px;color:#fff;text-shadow:0 2px 6px rgba(0,0,0,.6);pointer-events:none;transition:opacity .6s;white-space:nowrap}
+
+.toast{position:fixed;left:50%;top:64px;transform:translate(-50%,10px);opacity:0;z-index:55;pointer-events:none;background:#fff8c9;color:#3a2f12;
+  font-family:var(--marker);font-size:17px;padding:10px 16px;box-shadow:0 8px 20px rgba(0,0,0,.35);transition:all .3s cubic-bezier(.3,1.5,.4,1);max-width:86vw;text-align:center;rotate:-1.5deg}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+/* dock (now spinning) */
+.dock{position:fixed;left:16px;bottom:16px;z-index:45;width:min(460px,94vw);background:#141210;color:#f1ead9;border-radius:16px;
+  box-shadow:0 10px 30px rgba(0,0,0,.5);padding:10px;border:1px solid rgba(255,255,255,.08)}
+.dk{display:flex;align-items:center;gap:12px}
+.dk-cv{width:52px;height:52px;flex:none;border-radius:50%;background:repeating-radial-gradient(circle,#111 0 2px,#222 2px 4px);position:relative;overflow:hidden}
+.dk-cv img{position:absolute;inset:26%;width:48%;height:48%;border-radius:50%;object-fit:cover}
+.dk-cv.on{animation:spin 2.2s linear infinite}
+.dk-meta{min-width:0;flex:1}
+.dk-tag{font-family:var(--lcd);font-size:16px;letter-spacing:.04em;color:#7dff8a;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dk-tag.pk{color:#ffcf5a}
+.dk-t{font-weight:700;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dk-a{font-size:13px;color:#a79f90;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dk-b{display:flex;gap:6px;flex:none}
+.dk-b button,.dk-b a{border:0;background:#2a2622;color:#f1ead9;border-radius:99px;padding:8px 11px;font-size:12.5px;font-weight:700;text-decoration:none;white-space:nowrap}
+.dk-b button:hover,.dk-b a:hover{background:var(--red)}
+.dk-b .pri{background:#1db954;color:#06200f}
+.embed{display:none;margin-top:10px}
+.embed.on{display:block}
+.embed iframe{display:block;width:100%;height:152px;border:0;border-radius:12px}
+.live-back{display:none;margin-top:8px;font-family:var(--lcd);font-size:16px;color:#7dff8a;background:none;border:0;padding:0}
+.live-back.on{display:inline-block}
+
+/* modal */
+.modal{position:fixed;inset:0;z-index:70;display:none;align-items:center;justify-content:center;background:rgba(10,7,4,.55);padding:20px}
+.modal.on{display:flex}
+.sheet{position:relative;width:min(560px,100%);max-height:86vh;overflow:auto;background:
+  linear-gradient(transparent 31px,rgba(47,99,196,.18) 32px) 0 14px/100% 32px,
+  linear-gradient(90deg,transparent 46px,rgba(216,53,42,.35) 47px,transparent 48px),
+  #fbf7ec;
+  padding:34px 30px 28px 64px;box-shadow:0 20px 50px rgba(0,0,0,.5);rotate:-.8deg;animation:drop .35s cubic-bezier(.3,1.4,.4,1);font-family:var(--type);line-height:1.6;font-size:15px}
+@keyframes drop{from{transform:translateY(30px) scale(.96);opacity:0}}
+.sheet::before,.sheet::after{content:"";position:absolute;top:-12px;width:110px;height:28px;background:rgba(255,236,150,.75);box-shadow:0 1px 2px rgba(0,0,0,.1)}
+.sheet::before{left:30px;rotate:-6deg}.sheet::after{right:30px;rotate:5deg}
+.x{position:absolute;right:12px;top:10px;border:0;background:none;font-family:var(--marker);font-size:26px;line-height:1;color:var(--red)}
+.sheet h2{font-family:var(--marker);font-weight:400;font-size:34px;line-height:1.05;margin:0 0 6px;color:var(--ink)}
+.sheet h2 em{font-style:normal;color:var(--red)}
+.sheet .sub{font-family:var(--marker);color:var(--blue);font-size:18px;margin:0 0 14px}
+.sheet p{margin:0 0 12px}
+.sheet ul{margin:0 0 14px;padding-left:18px}
+.sheet li{margin-bottom:6px}
+.sheet .tags{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 14px}
+.sheet .tags span{font-family:var(--sans);font-weight:700;font-size:12px;background:var(--ink);color:#fff;padding:3px 9px;rotate:-1deg}
+.sheet .tags span:nth-child(3n){background:var(--red)}.sheet .tags span:nth-child(3n+1){background:var(--blue)}
+.sheet .btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.sheet .btns a,.sheet .btns button{font-family:var(--sans);font-weight:700;font-size:13.5px;text-decoration:none;border:2px solid var(--ink);background:#fff;padding:7px 13px;box-shadow:3px 3px 0 var(--ink);color:var(--ink)}
+.sheet .btns a:hover,.sheet .btns button:hover{background:#ffe066}
+.lvl{border:2px dashed #b9b1a1;padding:10px 12px;margin-bottom:10px;background:rgba(255,255,255,.6)}
+.lvl b{font-family:var(--lcd);font-size:20px;color:var(--red);display:block;line-height:1}
+.lvl .st{font-family:var(--lcd);font-size:17px;color:#2b8a3e}
+.crate{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:14px;margin-top:8px}
+.sleeve{border:0;background:none;padding:0;text-align:left;font-family:var(--sans)}
+.sleeve .s-img{position:relative;aspect-ratio:1;background:#222;box-shadow:3px 4px 0 rgba(0,0,0,.25);transition:transform .25s cubic-bezier(.3,1.5,.4,1)}
+.sleeve .s-img img{width:100%;height:100%;object-fit:cover;display:block}
+.sleeve .s-img::after{content:"";position:absolute;top:8%;right:-14%;width:76%;aspect-ratio:1;border-radius:50%;z-index:-1;
+  background:repeating-radial-gradient(circle,#111 0 2px,#222 2px 4px);transition:right .3s}
+.sleeve{position:relative;isolation:isolate}
+.sleeve:hover .s-img{transform:rotate(-3deg) translateY(-4px)}
+.sleeve:hover .s-img::after{right:-30%}
+.sleeve b{display:block;font-size:13px;margin-top:8px;line-height:1.2}
+.sleeve span{display:block;font-size:11.5px;color:#6d6656}
+
+/* guide */
+.gbtn{position:fixed;right:14px;bottom:14px;z-index:46;width:42px;height:42px;border-radius:50%;border:0;background:#fbf7ee;font-family:var(--marker);font-size:20px;box-shadow:0 4px 14px rgba(0,0,0,.35)}
+
+/* confetti */
+.cf{position:fixed;top:-12px;width:9px;height:13px;z-index:80;pointer-events:none;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(105vh) rotate(720deg)}}
+
+/* ===== mobile: pan the room ===== */
+@media (max-aspect-ratio:1/1){
+  .vp{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .vp::-webkit-scrollbar{display:none}
+  .room{position:relative;left:auto;top:auto;transform:none;height:100svh;width:160svh}
+  .long{display:none}.short{display:inline}
+  .bar{gap:5px;top:10px}
+  .pill{font-size:12px;padding:7px 10px 7px 7px}
+  .toast{top:100px}
+  .dock{bottom:10px;left:50%;transform:translateX(-50%)}
+  .gbtn{bottom:auto;top:56px;right:10px;width:36px;height:36px;font-size:17px}
+  .dk-b .hide-m{display:none}
+}
+@media (prefers-reduced-motion:reduce){.grain,.blob,.vinyl.on,.dk-cv.on,.lcd span{animation:none}}
+</style>
+</head>
+<body>
+<div class="grain" aria-hidden="true"></div>
+
+<header class="bar">
+  <a class="pill" href="https://indradarmawan2202.github.io/"><span class="ic">←</span><span class="long">signal / noise</span><span class="short">site</span></a>
+  <button class="pill" id="bWall"><span class="sw" id="swWall"></span><span class="long">wall colour</span><span class="short">wall</span></button>
+  <button class="pill" id="bLights"><span class="ic" id="icL">☾</span><span class="long" id="lbL">lights off</span><span class="short" id="lbL2">night</span></button>
+  <button class="pill" id="bSurprise"><span class="ic">✦</span>surprise</button>
+</header>
+<div class="hint" id="hint"><span class="long">everything in this room is clickable ✦</span><span class="short">← swipe to look around →</span></div>
+
+<div class="vp" id="vp">
+<div class="room" id="room">
+<svg class="scene" id="scene" viewBox="0 0 1600 1000" preserveAspectRatio="none" aria-label="Indra's bedroom">
+  <defs>
+    <pattern id="plaid" width="56" height="56" patternUnits="userSpaceOnUse" patternTransform="rotate(-8)">
+      <rect width="56" height="56" fill="#b52c25"/>
+      <rect y="18" width="56" height="12" fill="#1f2a4d" opacity=".85"/><rect x="18" width="12" height="56" fill="#1f2a4d" opacity=".7"/>
+      <rect y="42" width="56" height="3" fill="#f1d27a" opacity=".7"/><rect x="42" width="3" height="56" fill="#f1d27a" opacity=".6"/>
+    </pattern>
+    <pattern id="stripes" width="34" height="10" patternUnits="userSpaceOnUse"><rect width="17" height="10" fill="#000" opacity=".045"/></pattern>
+    <pattern id="planks" width="1600" height="56" patternUnits="userSpaceOnUse"><rect width="1600" height="56" fill="#6e523b"/><rect y="54" width="1600" height="2" fill="#4a3424"/></pattern>
+    <pattern id="halftone" width="6" height="6" patternUnits="userSpaceOnUse"><circle cx="3" cy="3" r="1.4" fill="#000" opacity=".35"/></pattern>
+    <radialGradient id="g-warm"><stop offset="0" stop-color="#ffb347" stop-opacity=".95"/><stop offset=".5" stop-color="#ff7a33" stop-opacity=".35"/><stop offset="1" stop-color="#ff7a33" stop-opacity="0"/></radialGradient>
+    <radialGradient id="g-crt"><stop offset="0" stop-color="#8fd3ff" stop-opacity=".8"/><stop offset="1" stop-color="#8fd3ff" stop-opacity="0"/></radialGradient>
+    <radialGradient id="g-bulb"><stop offset="0" stop-color="#fff3c4" stop-opacity=".9"/><stop offset="1" stop-color="#ffcf5a" stop-opacity="0"/></radialGradient>
+    <clipPath id="lavaGlass"><path d="M631 600 L 671 600 L 662 512 L 640 512 Z"/></clipPath>
+  </defs>
+
+  <!-- WALL + FLOOR -->
+  <rect class="wall" x="0" y="0" width="1600" height="772"/>
+  <rect x="0" y="0" width="1600" height="772" fill="url(#stripes)"/>
+  <rect x="0" y="762" width="1600" height="16" fill="#efe7d8"/><rect x="0" y="776" width="1600" height="4" fill="#bfb4a2"/>
+  <rect x="0" y="780" width="1600" height="220" fill="url(#planks)"/>
+  <ellipse cx="930" cy="930" rx="560" ry="96" fill="#2a2d3a"/>
+  <ellipse cx="930" cy="930" rx="520" ry="80" fill="none" stroke="#3d4254" stroke-width="10"/>
+  <ellipse cx="930" cy="930" rx="470" ry="64" fill="none" stroke="#c9372c" stroke-width="5" opacity=".7"/>
+
+  <!-- STRING LIGHTS (built in JS) -->
+  <path id="wire" d="M-10 34 Q 400 120 800 44 T 1610 52" fill="none" stroke="#2b2b2b" stroke-width="2.2"/>
+  <g id="bulbs"></g>
+
+  <!-- POSTERS -->
+  <g class="hot" data-open="about" tabindex="0" role="button" aria-label="Gig poster — about me" transform="translate(70 82) rotate(-3)">
+    <rect width="240" height="330" fill="#121212"/>
+    <rect width="240" height="330" fill="url(#halftone)" opacity=".25"/>
+    <text x="18" y="70" font-family="Anton" font-size="62" fill="#f4efe4">SIGNAL</text>
+    <text x="18" y="134" font-family="Anton" font-size="62" fill="#d8352a">/ NOISE</text>
+    <rect x="18" y="150" width="204" height="3" fill="#f4efe4"/>
+    <text x="18" y="182" font-family="Special Elite" font-size="15" fill="#f4efe4">LIVE FROM A BEDROOM</text>
+    <text x="18" y="202" font-family="Special Elite" font-size="15" fill="#f4efe4">IN SURABAYA, ID</text>
+    <text x="18" y="252" font-family="Permanent Marker" font-size="25" fill="#ffcf5a">Indra Darmawan</text>
+    <text x="18" y="276" font-family="Special Elite" font-size="12.5" fill="#bdb6a8">FULLSTACK DEV · AI ENGINEER</text>
+    <text x="18" y="312" font-family="Anton" font-size="18" fill="#f4efe4">2026 · NO COVER · ALL AGES</text>
+    <rect x="-14" y="-10" width="56" height="20" fill="rgba(255,240,170,.7)" transform="rotate(-30)"/>
+    <rect x="212" y="-6" width="56" height="20" fill="rgba(255,240,170,.7)" transform="rotate(28 212 -6)"/>
+  </g>
+
+  <g class="hot" data-open="qg" tabindex="0" role="button" aria-label="Poster — Question Generator AI" transform="translate(345 58) rotate(2.5)">
+    <rect width="215" height="290" fill="#d8352a"/>
+    <text x="14" y="62" font-family="Anton" font-size="47" fill="#111">QUESTION</text>
+    <text x="14" y="114" font-family="Anton" font-size="47" fill="#111">GENERATOR</text>
+    <text x="16" y="146" font-family="Permanent Marker" font-size="19" fill="#fff">the 9 types tour</text>
+    <g font-family="Special Elite" font-size="12.5" fill="#1a0b08">
+      <text x="16" y="182">MCQ ............ SOLD OUT</text><text x="16" y="202">MATCHING ....... SOLD OUT</text>
+      <text x="16" y="222">FILL THE TABLE . SOLD OUT</text><text x="16" y="242">CAUSE+EFFECT ... SOLD OUT</text>
+      <text x="16" y="262">+ 5 MORE DATES</text>
+    </g>
+    <rect x="80" y="-12" width="60" height="22" fill="rgba(255,240,170,.75)" transform="rotate(4 110 0)"/>
+  </g>
+
+  <g class="hot" data-open="eaqe" tabindex="0" role="button" aria-label="Poster — EAQE thesis" transform="translate(590 92) rotate(-2)">
+    <rect width="185" height="250" fill="#2f63c4"/>
+    <rect width="185" height="250" fill="url(#halftone)" opacity=".5"/>
+    <text x="14" y="78" font-family="Anton" font-size="76" fill="#f4efe4">EAQE</text>
+    <text x="14" y="104" font-family="Permanent Marker" font-size="15" fill="#ffcf5a">knowledge graph sessions</text>
+    <g stroke="#f4efe4" stroke-width="2.5"><line x1="40" y1="160" x2="92" y2="136"/><line x1="92" y1="136" x2="146" y2="168"/><line x1="92" y1="136" x2="96" y2="200"/><line x1="40" y1="160" x2="96" y2="200"/><line x1="146" y1="168" x2="96" y2="200"/></g>
+    <g fill="#f4efe4"><circle cx="40" cy="160" r="9"/><circle cx="146" cy="168" r="9"/><circle cx="96" cy="200" r="9"/></g>
+    <circle cx="92" cy="136" r="15" fill="#d8352a"/>
+    <text x="14" y="236" font-family="Special Elite" font-size="11.5" fill="#f4efe4">THESIS · RAG · KDD UNESA</text>
+    <rect x="62" y="-10" width="56" height="20" fill="rgba(255,240,170,.75)"/>
+  </g>
+
+  <g class="hot" data-open="report" tabindex="0" role="button" aria-label="Flyer — AI Learning Report" transform="translate(352 378) rotate(4)">
+    <rect width="172" height="142" fill="#f5f1e6"/>
+    <text x="12" y="34" font-family="Anton" font-size="25" fill="#111">LEARNING REPORT</text>
+    <g fill="#111"><rect x="16" y="98" width="18" height="26"/><rect x="42" y="78" width="18" height="46"/><rect x="68" y="88" width="18" height="36"/><rect x="94" y="58" width="18" height="66"/><rect x="120" y="70" width="18" height="54"/></g>
+    <text x="12" y="52" font-family="Permanent Marker" font-size="12" fill="#d8352a">students → insights</text>
+    <rect x="60" y="-8" width="50" height="16" fill="rgba(255,240,170,.75)"/>
+  </g>
+
+  <g class="hot" data-open="affiliate" tabindex="0" role="button" aria-label="Flyer — Affiliate System" transform="translate(556 375) rotate(-5)">
+    <rect width="160" height="124" fill="#ffd84d"/>
+    <text x="12" y="36" font-family="Anton" font-size="27" fill="#111">AFFILIATE</text>
+    <text x="12" y="64" font-family="Anton" font-size="27" fill="#111">SYSTEM</text>
+    <text x="12" y="98" font-family="Permanent Marker" font-size="15" fill="#d8352a">referral links!!</text>
+    <rect x="52" y="-8" width="50" height="16" fill="rgba(255,255,255,.6)"/>
+  </g>
+
+  <!-- pennant -->
+  <g class="hot" data-toast="pennant" tabindex="0" role="button" aria-label="Surabaya pennant" transform="translate(800 92)">
+    <rect x="0" y="0" width="10" height="92" fill="#3a2a1d"/>
+    <path d="M10 6 L 250 46 L 10 86 Z" fill="#d8352a"/>
+    <text x="22" y="54" font-family="Anton" font-size="26" fill="#fff" letter-spacing="2" transform="rotate(4 22 54)">SURABAYA</text>
+  </g>
+
+  <!-- polaroids -->
+  <g class="hot" data-toast="polaroid" tabindex="0" role="button" aria-label="Polaroids" transform="translate(830 228)">
+    <g transform="rotate(-6)"><rect width="118" height="138" fill="#fbfaf6"/><rect x="9" y="9" width="100" height="96" fill="#3d4a5e"/><circle cx="59" cy="57" r="26" fill="#ffcf5a"/><path d="M9 105 L 40 70 L 70 92 L 109 60 L 109 105 Z" fill="#26313f"/><text x="12" y="127" font-family="Permanent Marker" font-size="13" fill="#333">first deploy ✓</text></g>
+    <g transform="translate(112 18) rotate(5)"><rect width="118" height="138" fill="#fbfaf6"/><rect x="9" y="9" width="100" height="96" fill="#2c2420"/><text x="22" y="66" font-family="VT323" font-size="30" fill="#7dff8a">sempro</text><text x="40" y="92" font-family="VT323" font-size="24" fill="#7dff8a">✓ ok</text><text x="12" y="127" font-family="Permanent Marker" font-size="13" fill="#333">3 nov 2026</text></g>
+  </g>
+
+  <!-- calendar -->
+  <g class="hot" data-toast="calendar" tabindex="0" role="button" aria-label="Calendar" transform="translate(880 410)">
+    <rect width="160" height="168" fill="#fbfaf6" stroke="#ccc4b6"/>
+    <rect width="160" height="34" fill="#2f63c4"/>
+    <text x="80" y="24" text-anchor="middle" font-family="Anton" font-size="19" fill="#fff">NOV 2026</text>
+    <g id="cal" font-family="Special Elite" font-size="10" fill="#555"></g>
+    <circle cx="0" cy="0" r="0" id="calCircle" fill="none" stroke="#d8352a" stroke-width="2.5"/>
+  </g>
+
+  <!-- BED -->
+  <g id="bed">
+    <rect x="22" y="502" width="14" height="500" rx="7" fill="#9aa1aa"/>
+    <rect x="536" y="502" width="14" height="300" rx="7" fill="#9aa1aa"/>
+    <rect x="22" y="500" width="528" height="14" rx="7" fill="#b3b9c1"/>
+    <rect x="22" y="590" width="528" height="12" rx="6" fill="#9aa1aa"/>
+    <g id="bars" fill="#a7adb5"></g>
+    <rect x="34" y="640" width="545" height="122" rx="20" fill="#f2efe9" stroke="#d6d0c4" stroke-width="2"/>
+    <rect x="62" y="588" width="210" height="84" rx="38" fill="#fbfaf7" stroke="#e1dbd0" stroke-width="2"/>
+    <rect x="20" y="760" width="566" height="14" rx="7" fill="#b3b9c1"/>
+    <path d="M150 652 C 250 622, 420 650, 590 636 L 600 1000 L 112 1000 C 120 880, 128 760, 150 652 Z" fill="url(#plaid)"/>
+    <path d="M150 652 C 250 622, 420 650, 590 636" fill="none" stroke="#7e1d18" stroke-width="5" opacity=".6"/>
+    <path d="M300 690 C 340 660, 420 662, 470 690 C 500 708, 480 740, 430 744 C 370 750, 300 730, 300 690 Z" fill="#1b1b1f"/>
+    <g class="hot" data-open="about" tabindex="0" role="button" aria-label="Diary — about me" transform="translate(200 690) rotate(-14)">
+      <rect width="118" height="84" rx="4" fill="#2f63c4"/>
+      <rect x="8" y="8" width="102" height="68" fill="#3a6fd0"/>
+      <g fill="#ddd"><circle cx="4" cy="12" r="3"/><circle cx="4" cy="26" r="3"/><circle cx="4" cy="40" r="3"/><circle cx="4" cy="54" r="3"/><circle cx="4" cy="68" r="3"/></g>
+      <rect x="22" y="26" width="72" height="22" fill="#fbfaf6" transform="rotate(-3 58 37)"/>
+      <text x="28" y="42" font-family="Permanent Marker" font-size="14" fill="#d8352a" transform="rotate(-3 58 37)">DIARY</text>
+    </g>
+  </g>
+
+  <!-- NIGHTSTAND + LAVA LAMP -->
+  <rect x="592" y="640" width="122" height="182" rx="4" fill="#7a5a3f"/>
+  <rect x="604" y="690" width="98" height="52" rx="3" fill="#6a4c34"/><circle cx="653" cy="716" r="5" fill="#d9c39a"/>
+  <rect x="604" y="752" width="98" height="52" rx="3" fill="#6a4c34"/><circle cx="653" cy="778" r="5" fill="#d9c39a"/>
+  <g class="hot" id="lava" data-act="lights" tabindex="0" role="button" aria-label="Lava lamp — lights">
+    <path d="M621 640 L 681 640 L 671 600 L 631 600 Z" fill="#b8bec7"/>
+    <path d="M631 600 L 671 600 L 662 512 L 640 512 Z" fill="#ff6f4f"/>
+    <g clip-path="url(#lavaGlass)" fill="#ffd166">
+      <ellipse class="blob" cx="651" cy="586" rx="13" ry="10"/><ellipse class="blob b2" cx="648" cy="560" rx="8" ry="11"/>
+      <ellipse class="blob b3" cx="655" cy="592" rx="9" ry="7"/><ellipse class="blob b4" cx="651" cy="566" rx="6" ry="8"/>
+    </g>
+    <path d="M640 512 L 662 512 L 659 494 L 643 494 Z" fill="#b8bec7"/>
+  </g>
+
+  <!-- SKATEBOARD -->
+  <g class="hot" id="skate" data-act="skate" tabindex="0" role="button" aria-label="Skateboard" transform="translate(736 440) rotate(-7)">
+    <rect x="0" y="0" width="62" height="350" rx="31" fill="#1c1c1f"/>
+    <rect x="6" y="6" width="50" height="338" rx="25" fill="#2a2a2e"/>
+    <rect x="-6" y="48" width="74" height="10" rx="4" fill="#9aa1aa"/><rect x="-6" y="292" width="74" height="10" rx="4" fill="#9aa1aa"/>
+    <circle cx="-4" cy="53" r="9" fill="#f4efe4"/><circle cx="66" cy="53" r="9" fill="#f4efe4"/><circle cx="-4" cy="297" r="9" fill="#f4efe4"/><circle cx="66" cy="297" r="9" fill="#f4efe4"/>
+    <rect x="12" y="130" width="38" height="56" fill="#d8352a" transform="rotate(8 31 158)"/>
+    <text x="31" y="164" text-anchor="middle" font-family="Anton" font-size="11" fill="#fff" transform="rotate(8 31 158)">S/N</text>
+    <circle cx="31" cy="232" r="13" fill="#ffd84d"/><text x="31" y="236" text-anchor="middle" font-family="Anton" font-size="9" fill="#111">AI</text>
+  </g>
+
+  <!-- CABINET (turntable sits on top) -->
+  <rect x="800" y="738" width="270" height="170" rx="5" fill="#5a3f2a"/>
+  <rect x="812" y="752" width="118" height="142" fill="#3a281a"/>
+  <rect x="940" y="752" width="118" height="142" fill="#3a281a"/>
+  <g id="cabRecords"></g>
+  <rect x="796" y="732" width="278" height="12" rx="3" fill="#6d4d34"/>
+
+  <!-- SHELF -->
+  <rect x="1110" y="40" width="440" height="730" fill="#3b2a1d"/>
+  <rect x="1100" y="34" width="22" height="742" fill="#5b4130"/><rect x="1538" y="34" width="22" height="742" fill="#5b4130"/>
+  <g fill="#6a4c37"><rect x="1100" y="34" width="460" height="16"/><rect x="1100" y="206" width="460" height="16"/><rect x="1100" y="392" width="460" height="16"/><rect x="1100" y="578" width="460" height="16"/><rect x="1100" y="760" width="460" height="16"/></g>
+
+  <g class="hot" id="books" data-open="skills" tabindex="0" role="button" aria-label="Books & CDs — skills"></g>
+
+  <g id="robots"></g>
+  <text x="1330" y="405" text-anchor="middle" font-family="Permanent Marker" font-size="11" fill="#ffcf5a">AI agents — do not feed</text>
+
+  <g class="hot" id="console" data-open="exp" tabindex="0" role="button" aria-label="Game console — experience">
+    <rect x="1132" y="502" width="170" height="74" rx="6" fill="#c9c6bf"/>
+    <rect x="1132" y="540" width="170" height="36" rx="4" fill="#2b2b2e"/>
+    <rect x="1170" y="486" width="80" height="26" rx="2" fill="#555"/>
+    <rect x="1176" y="476" width="68" height="30" rx="2" fill="#d8352a"/>
+    <text x="1210" y="496" text-anchor="middle" font-family="VT323" font-size="15" fill="#fff">SAVE FILES</text>
+    <circle cx="1150" cy="558" r="5" fill="#d8352a"/><rect x="1166" y="553" width="30" height="8" rx="3" fill="#888"/>
+    <text x="1290" y="564" text-anchor="end" font-family="Anton" font-size="12" fill="#c9c6bf">8-BIT</text>
+    <rect x="1316" y="424" width="210" height="152" rx="12" fill="#2a2a2a"/>
+    <rect x="1330" y="436" width="154" height="122" rx="14" fill="#14324a"/>
+    <text class="crt-txt" x="1407" y="492" text-anchor="middle" font-family="VT323" font-size="24" fill="#8fd3ff">PRESS</text>
+    <text class="crt-txt" x="1407" y="516" text-anchor="middle" font-family="VT323" font-size="24" fill="#8fd3ff">START</text>
+    <circle cx="1505" cy="460" r="7" fill="#888"/><circle cx="1505" cy="484" r="7" fill="#888"/>
+  </g>
+
+  <g class="hot" id="lps" data-open="crate" tabindex="0" role="button" aria-label="Records — pick a record">
+    <g id="lpCovers"></g>
+    <g transform="translate(1406 664)"><rect width="34" height="96" fill="#f0c419"/><rect x="34" y="6" width="34" height="90" fill="#e8e3d6"/><rect x="68" y="14" width="34" height="82" fill="#d8352a"/><rect x="102" y="2" width="30" height="94" fill="#2f63c4"/></g>
+  </g>
+
+  <!-- FLOOR ITEMS -->
+  <g class="hot" id="floorVinyl" data-open="crate" tabindex="0" role="button" aria-label="Loose record" transform="translate(705 952)">
+    <ellipse rx="72" ry="22" fill="#111"/><ellipse rx="56" ry="17" fill="none" stroke="#2a2a2a" stroke-width="3"/><ellipse rx="22" ry="7" fill="#d8352a"/>
+  </g>
+  <g class="hot" data-open="contact" tabindex="0" role="button" aria-label="Flip phone — contact" transform="translate(1188 900) rotate(18)">
+    <rect width="44" height="78" rx="9" fill="#a9b0bb"/><rect x="6" y="8" width="32" height="30" rx="3" fill="#6fd0ff"/>
+    <text x="22" y="28" text-anchor="middle" font-family="VT323" font-size="12" fill="#06324a">1 msg</text>
+    <g fill="#d7dbe2"><rect x="8" y="46" width="8" height="6" rx="1"/><rect x="18" y="46" width="8" height="6" rx="1"/><rect x="28" y="46" width="8" height="6" rx="1"/><rect x="8" y="56" width="8" height="6" rx="1"/><rect x="18" y="56" width="8" height="6" rx="1"/><rect x="28" y="56" width="8" height="6" rx="1"/></g>
+  </g>
+  <g class="hot" data-toast="comic" tabindex="0" role="button" aria-label="Comic" transform="translate(470 930) rotate(-9)">
+    <rect width="96" height="62" fill="#ffd84d"/><text x="8" y="26" font-family="Anton" font-size="20" fill="#d8352a">BUG-MAN</text><text x="8" y="50" font-family="Permanent Marker" font-size="11" fill="#111">issue #404</text>
+  </g>
+  <g class="hot" data-toast="shoes" tabindex="0" role="button" aria-label="Sneakers" transform="translate(1330 880)">
+    <path d="M0 70 C 0 30, 20 10, 50 8 L 60 40 C 90 46, 120 54, 130 70 Z" fill="#141414"/><rect x="-2" y="68" width="134" height="14" rx="5" fill="#f2efe8"/>
+    <g stroke="#f2efe8" stroke-width="2.5"><line x1="40" y1="22" x2="56" y2="18"/><line x1="44" y1="32" x2="60" y2="28"/><line x1="48" y1="42" x2="64" y2="38"/></g>
+    <g transform="translate(118 26)"><path d="M0 70 C 0 30, 20 10, 50 8 L 60 40 C 90 46, 120 54, 130 70 Z" fill="#c9372c"/><rect x="-2" y="68" width="134" height="14" rx="5" fill="#f2efe8"/></g>
+  </g>
+
+  <!-- NIGHT -->
+  <rect class="night-dim" x="0" y="0" width="1600" height="1000"/>
+  <g class="glow">
+    <circle cx="651" cy="556" r="190" fill="url(#g-warm)"/>
+    <circle cx="1407" cy="497" r="120" fill="url(#g-crt)"/>
+    <g id="bulbGlows"></g>
+  </g>
+</svg>
+
+<!-- TURNTABLE -->
+<div class="tt hot" id="tt" tabindex="0" role="button" aria-label="Turntable — now playing">
+  <div class="tt-top"><div class="plinth">
+    <div class="platter"><div class="vinyl" id="vinyl"><div class="label"><img id="labelImg" alt=""><i></i></div></div></div>
+    <div class="arm" id="arm"><i class="pv"></i><i class="rod"></i><i class="hd"></i></div>
+    <i class="knob k1"></i><i class="knob k2"></i><span class="rpm">33⅓</span>
+  </div></div>
+  <div class="tt-front"><div class="lcd"><span id="lcd">NO SIGNAL — pick a record from the crate</span></div><i class="led" id="led"></i></div>
+</div>
+</div>
+</div>
+
+<!-- NOW SPINNING DOCK -->
+<div class="dock" id="dock">
+  <div class="dk">
+    <div class="dk-cv" id="dkCv"><img id="dkImg" alt=""></div>
+    <div class="dk-meta">
+      <div class="dk-tag" id="dkTag">◌ tuning in…</div>
+      <div class="dk-t" id="dkT">Indra's turntable</div>
+      <div class="dk-a" id="dkA">checking Spotify</div>
+    </div>
+    <div class="dk-b">
+      <button class="pri" id="dkPlay">▶ play</button>
+      <a id="dkOpen" class="hide-m" target="_blank" rel="noopener" href="https://open.spotify.com">↗</a>
+      <button id="dkCrate">crate</button>
+    </div>
+  </div>
+  <button class="live-back" id="liveBack">● back to live</button>
+  <div class="embed" id="embed"></div>
+</div>
+
+<div class="modal" id="modal" aria-hidden="true"><div class="sheet" id="sheet" role="dialog" aria-modal="true"></div></div>
+<div class="toast" id="toast"></div>
+<button class="gbtn" id="gbtn" aria-label="What can I click?">?</button>
+
+<script>
+/* ============ CONFIG ============ */
+const SPOTIFY_NOW = 'https://spotify-now.indra220205.workers.dev';
+const ALBUMS = [
+  ['Arctic Monkeys','AM','78bpIziExqiI9qztvNFlQu','4ae1c4c5c45aabe565499163'],
+  ['Pierce The Veil','Selfish Machines','5j53HGspZrUT5nXmVAUAsN','3566e4014e1398e7b279d772'],
+  ['My Chemical Romance','The Black Parade','0FZK97MXMm5mUQ8mtudjuK','663b6ce496144fa5c3670ac0'],
+  ['Paramore','Riot!','3UoOO8m0oxxvUHXUKf3qcZ','69966efa45b125ed6711b43c'],
+  ['Neck Deep',"Life's Not Out To Get You",'3umOBqXWR9VnJTQoe9Qkkj','858e191c07bf2ab4b9992dd7'],
+  ['Chase Atlantic','Chase Atlantic','7C8uqokvE67UOlu1TiEYMd','5a0c2870f4f309e382d1fad6'],
+  ['The Neighbourhood','I Love You.','4xkM0BwLM9H2IUcbYzpcBI','8265a736a1eb838ad5a0b921'],
+  ['Deftones','White Pony','5LEXck3kfixFaA3CqVE7bC','5c53799f473fa3e1a48c00ed'],
+  ['wave to earth','0.1 flaws and all.','5T0Gt5JYXh6gEttuB8ujML','24f8c3ad20b7c6cfecb5832e'],
+  ['keshi','onoffonoff','0GJmg6PCM2HKNv8CfdkNgX','247b7dc433934fa1d577c71c'],
+  ['Joji','Nectar','6gJ8VKn5PAFcCIVaf3B2uE','f733e50079838090eebc3fe4']
+].map(([artist, title, id, img]) => ({ artist, title, id, cover: 'https://i.scdn.co/image/ab67616d00001e02' + img, url: 'https://open.spotify.com/album/' + id }));
+
+const LINKS = { email: 'indradarmawan993@gmail.com', github: 'https://github.com/indradarmawan2202', linkedin: 'https://www.linkedin.com/in/muhammad-indra-darmawan', site: 'https://indradarmawan2202.github.io/' };
+
+(() => {
+const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const NS = 'http://www.w3.org/2000/svg';
+const store = { get(k, d) { try { const v = localStorage.getItem('room.' + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } }, set(k, v) { try { localStorage.setItem('room.' + k, JSON.stringify(v)); } catch (e) {} } };
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const svgEl = (tag, attrs, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); parent && parent.appendChild(e); return e; };
+
+/* ---------- toast ---------- */
+let tt0; function toast(m, ms = 2600) { const t = $('#toast'); t.textContent = m; t.classList.add('show'); clearTimeout(tt0); tt0 = setTimeout(() => t.classList.remove('show'), ms); }
+
+/* ---------- build scene bits ---------- */
+// string lights
+(() => {
+  const wire = $('#wire'), L = wire.getTotalLength(), g = $('#bulbs'), gg = $('#bulbGlows');
+  const cols = ['#ff5a4f', '#ffd84d', '#6fd0ff', '#9ff0a8', '#ff9ad5'];
+  for (let i = 0, d = 30; d < L; d += 58, i++) {
+    const p = wire.getPointAtLength(d), c = cols[i % cols.length];
+    svgEl('rect', { x: p.x - 3, y: p.y, width: 6, height: 6, fill: '#333' }, g);
+    svgEl('ellipse', { class: 'bulb', cx: p.x, cy: p.y + 14, rx: 6, ry: 9, fill: c, style: 'color:' + c }, g);
+    svgEl('circle', { cx: p.x, cy: p.y + 14, r: 34, fill: 'url(#g-bulb)' }, gg);
+  }
+})();
+// bed bars
+(() => { const g = $('#bars'); for (let x = 60; x < 530; x += 38) svgEl('rect', { x, y: 514, width: 7, height: 78, rx: 3 }, g); })();
+// calendar
+(() => {
+  const g = $('#cal'); let d = 1; const start = 0; // Nov 1 2026 = Sunday
+  for (let w = 0; w < 5; w++) for (let k = 0; k < 7; k++) {
+    const idx = w * 7 + k; if (idx < start || d > 30) continue;
+    svgEl('text', { x: 14 + k * 21, y: 54 + w * 21 }, g).textContent = d; d++;
+  }
+  const c = $('#calCircle'); c.setAttribute('cx', 14 + 2 * 21 + 3); c.setAttribute('cy', 54 - 4); c.setAttribute('r', 10);
+  const s = $('#calCircle').parentNode; svgEl('text', { x: 80, y: 160, 'text-anchor': 'middle', 'font-family': 'Permanent Marker', 'font-size': 11, fill: '#d8352a' }, s).textContent = 'sempro ✓  /  18: build a room';
+})();
+// books / CDs (skills)
+(() => {
+  const g = $('#books');
+  const skills = [['PYTHON', '#2f63c4'], ['PYTORCH', '#d8352a'], ['SCIKIT', '#f0c419'], ['PANDAS', '#1b1b1b'], ['HF', '#ffcf5a'], ['RAG', '#3fa36b'], ['GEMINI', '#7b61ff'],
+    ['LARAVEL', '#e2483c'], ['LIVEWIRE', '#ff8ac2'], ['REACT', '#61c9e8'], ['TS', '#2f63c4'], ['EXPRESS', '#555'], ['POSTGRES', '#336791'], ['TAILWIND', '#38bdf8']];
+  let x = 1128;
+  skills.forEach(([s, c], i) => {
+    const w = 22 + (i * 7) % 12, h = 120 + (i * 13) % 40, y = 206 - h;
+    svgEl('rect', { x, y, width: w, height: h, fill: c, stroke: 'rgba(0,0,0,.25)' }, g);
+    const t = svgEl('text', { x: x + w / 2 + 4, y: 200, 'font-family': 'Anton', 'font-size': 12, fill: ['#ffcf5a', '#f0c419', '#61c9e8', '#38bdf8', '#ff8ac2'].includes(c) ? '#111' : '#fff', transform: `rotate(-90 ${x + w / 2 + 4} 200)` }, g);
+    t.textContent = s; x += w + 3;
+  });
+  svgEl('rect', { x: x + 4, y: 120, width: 16, height: 86, fill: '#c9c6bf', transform: `rotate(12 ${x + 12} 206)` }, g);
+})();
+// robots (original designs)
+(() => {
+  const g = $('#robots');
+  const R = [[1140, '#d8352a', '#2f63c4'], [1262, '#2f63c4', '#f0c419'], [1384, '#f0c419', '#d8352a']];
+  R.forEach(([x, a, b], i) => {
+    const r = svgEl('g', { class: 'hot', 'data-toast': 'robot' + i, tabindex: 0, role: 'button', 'aria-label': 'Robot toy' }, g);
+    svgEl('line', { x1: x + 50, y1: 250, x2: x + 50, y2: 236, stroke: '#888', 'stroke-width': 3 }, r);
+    svgEl('circle', { cx: x + 50, cy: 234, r: 6, fill: b }, r);
+    svgEl('rect', { x: x + 22, y: 250, width: 56, height: 42, rx: 6, fill: a }, r);
+    svgEl('rect', { x: x + 30, y: 260, width: 40, height: 18, rx: 3, fill: '#111' }, r);
+    svgEl('rect', { class: 'robot-eye', x: x + 36, y: 265, width: 9, height: 8, fill: '#7dff8a' }, r);
+    svgEl('rect', { class: 'robot-eye', x: x + 55, y: 265, width: 9, height: 8, fill: '#7dff8a' }, r);
+    svgEl('rect', { x: x + 14, y: 296, width: 72, height: 52, rx: 4, fill: b }, r);
+    svgEl('rect', { x: x + 34, y: 306, width: 32, height: 22, fill: '#e9e4d8' }, r);
+    svgEl('circle', { cx: x + 42, cy: 317, r: 4, fill: a }, r); svgEl('circle', { cx: x + 58, cy: 317, r: 4, fill: '#111' }, r);
+    svgEl('rect', { x: x - 2, y: 298, width: 14, height: 40, rx: 4, fill: a }, r); svgEl('rect', { x: x + 88, y: 298, width: 14, height: 40, rx: 4, fill: a }, r);
+    svgEl('rect', { x: x + 22, y: 350, width: 22, height: 40, rx: 3, fill: '#555' }, r); svgEl('rect', { x: x + 56, y: 350, width: 22, height: 40, rx: 3, fill: '#555' }, r);
+    svgEl('rect', { x: x + 18, y: 382, width: 30, height: 10, fill: a }, r); svgEl('rect', { x: x + 52, y: 382, width: 30, height: 10, fill: a }, r);
+  });
+})();
+// LP covers on shelf + cabinet record spines
+(() => {
+  const g = $('#lpCovers');
+  [[2, 1132, 618, -4], [7, 1262, 612, 3]].forEach(([i, x, y, r]) => {
+    const a = ALBUMS[i];
+    const grp = svgEl('g', { transform: `rotate(${r} ${x + 70} ${y + 75})` }, g);
+    svgEl('circle', { cx: x + 120, cy: y + 72, r: 64, fill: '#111' }, grp);
+    svgEl('rect', { x, y, width: 140, height: 140, fill: '#222' }, grp);
+    svgEl('image', { href: a.cover, x, y, width: 140, height: 140, preserveAspectRatio: 'xMidYMid slice' }, grp);
+  });
+  const c = $('#cabRecords'); const cols = ['#d8352a', '#f4efe4', '#2f63c4', '#111', '#f0c419', '#3fa36b'];
+  for (let i = 0; i < 26; i++) { const x = 816 + i * 4.4 + (i > 12 ? 20 : 0); svgEl('rect', { x, y: 760 + (i % 3) * 3, width: 3.4, height: 130, fill: cols[i % cols.length], opacity: .9 }, c); }
+})();
+
+/* ---------- modal content ---------- */
+const P = {
+  about: () => `<h2>hey, i'm <em>Indra</em> ✦</h2><p class="sub">Muhammad Indra Darmawan · Surabaya, ID</p>
+    <p>Fullstack developer by day, NLP researcher by night. I lead AI feature development at <b>Ascendemy</b> (CV Inovasi Datanusa) and I'm an S1 Sistem Informasi student at UNESA, class of 2023.</p>
+    <p><b>Right now:</b></p><ul><li>thesis: RAG + knowledge-graph query expansion (EAQE)</li><li>shipping LLM features teachers actually use</li><li>open to freelance &amp; research collabs</li></ul>
+    <div class="btns"><a href="mailto:${LINKS.email}">email me</a><a href="${LINKS.github}" target="_blank" rel="noopener">GitHub ↗</a><a href="${LINKS.linkedin}" target="_blank" rel="noopener">LinkedIn ↗</a><a href="${LINKS.site}">the zine site ↗</a></div>`,
+  qg: () => `<h2>Question <em>Generator</em> AI</h2><p class="sub">edtech · genai · 2026</p>
+    <p>Generates 9 question types (MCQ, matching, fill-the-table, cause &amp; effect, ordering…) with Bloom's-taxonomy calibration and structured JSON output.</p>
+    <ul><li>auto-scored quiz mode</li><li>render-from-data chart questions</li><li>Word / PDF export with custom letterhead</li></ul>
+    <div class="tags"><span>React</span><span>Express</span><span>Gemini API</span><span>JSON schema</span></div>`,
+  eaqe: () => `<h2><em>EAQE</em> — my thesis</h2><p class="sub">Entity-Aware Query Expansion</p>
+    <p>A RAG pipeline for mental-health counseling: link the entities in a question, expand the query through a knowledge graph, retrieve, then generate an answer grounded in sources you can check.</p>
+    <p>Evaluated against retrieval baselines, with KDD Research Group, UNESA.</p>
+    <div class="tags"><span>Python</span><span>Knowledge Graph</span><span>RAG</span><span>LLM</span></div>`,
+  report: () => `<h2>AI <em>Learning Report</em></h2><p class="sub">ascendemy · 2026</p>
+    <p>Turns students' exam attempts into structured learning reports. Runs async on queues, stores results in a JSONB schema, built on a Strategy Pattern architecture.</p>
+    <div class="tags"><span>Laravel</span><span>PostgreSQL</span><span>Queues</span><span>LLM API</span></div>`,
+  affiliate: () => `<h2><em>Affiliate</em> System</h2><p class="sub">ascendemy · 2026</p>
+    <p>Referral links, commission tracking and a partner panel for the CBT platform.</p>
+    <div class="tags"><span>Livewire 3</span><span>Filament 4</span><span>PostgreSQL</span></div>`,
+  skills: () => `<h2>the <em>bookshelf</em></h2><p class="sub">a.k.a. my skills</p>
+    <p><b>AI / data</b></p><div class="tags"><span>Python</span><span>PyTorch</span><span>scikit-learn</span><span>Pandas</span><span>HF Transformers</span><span>IndoBERT</span><span>RAG</span><span>Gemini / Groq</span></div>
+    <p><b>web / backend</b></p><div class="tags"><span>Laravel 11</span><span>Livewire</span><span>Filament</span><span>React</span><span>TypeScript</span><span>Express</span><span>Tailwind</span><span>PostgreSQL</span></div>
+    <p><b>house rules:</b> evaluation first · structured output · clean architecture.</p>`,
+  exp: () => `<h2>SAVE <em>FILES</em></h2><p class="sub">choose a save to continue…</p>
+    <div class="lvl"><b>SLOT 1 — FULLSTACK DEVELOPER</b>CV Inovasi Datanusa (Ascendemy) · 2026 — now<br>leading AI features: Question Generator, Learning Report, Gemini &amp; Groq.<div class="st">▶ IN PROGRESS</div></div>
+    <div class="lvl"><b>SLOT 2 — MBKM INTERNSHIP</b>CV Inovasi Datanusa · Feb — Jun 2026<br>CBT exam page, RBAC, subscriptions, question management.<div class="st">✓ CLEARED</div></div>
+    <div class="lvl"><b>SLOT 3 — RESEARCH MEMBER</b>KDD Research Group, UNESA<div class="st">▶ IN PROGRESS</div></div>
+    <div class="lvl"><b>SLOT 4 — S1 SISTEM INFORMASI</b>Universitas Negeri Surabaya · 2023 — now<div class="st">▶ IN PROGRESS</div></div>`,
+  contact: () => `<h2>1 new <em>message</em></h2><p class="sub">from: you · to: indra</p>
+    <p>Got a web + AI project, an NLP research idea, or need a freelance hand? Hit me up.</p>
+    <div class="btns"><a href="mailto:${LINKS.email}">${LINKS.email}</a><button id="copyMail">copy email</button></div>
+    <div class="btns" style="margin-top:12px"><a href="${LINKS.github}" target="_blank" rel="noopener">GitHub ↗</a><a href="${LINKS.linkedin}" target="_blank" rel="noopener">LinkedIn ↗</a></div>`,
+  crate: () => `<h2>the <em>crate</em></h2><p class="sub">pick a record → it goes on the turntable</p>
+    <div class="crate">${ALBUMS.map((a, i) => `<button class="sleeve" data-pick="${i}"><div class="s-img"><img src="${a.cover}" alt="" loading="lazy"></div><b>${esc(a.title)}</b><span>${esc(a.artist)}</span></button>`).join('')}</div>`,
+  guide: () => `<h2>what can i <em>click?</em></h2><p class="sub">basically everything, but here's the map</p>
+    <ul><li><b>gig poster / diary</b> — about me</li><li><b>other posters &amp; flyers</b> — projects</li><li><b>bookshelf</b> — skills</li><li><b>8-bit console</b> — experience</li><li><b>flip phone</b> — contact</li><li><b>turntable</b> — live from my Spotify</li><li><b>records</b> — pick an album</li><li><b>lava lamp</b> — lights on / off</li></ul>
+    <div class="btns">${['about', 'qg', 'eaqe', 'skills', 'exp', 'contact', 'crate'].map(k => `<button data-goto="${k}">${{ about: 'about', qg: 'question gen', eaqe: 'EAQE', skills: 'skills', exp: 'experience', contact: 'contact', crate: 'records' }[k]}</button>`).join('')}</div>`
+};
+const modal = $('#modal'), sheet = $('#sheet');
+let lastFocus = null;
+function openModal(k) {
+  if (!P[k]) return;
+  lastFocus = document.activeElement;
+  sheet.innerHTML = `<button class="x" aria-label="Close">✕</button>` + P[k]();
+  modal.classList.add('on'); modal.setAttribute('aria-hidden', 'false'); sheet.scrollTop = 0; $('.x', sheet).focus();
+  hideHint();
+}
+function closeModal() { modal.classList.remove('on'); modal.setAttribute('aria-hidden', 'true'); lastFocus && lastFocus.focus && lastFocus.focus(); }
+modal.addEventListener('click', e => {
+  if (e.target === modal || e.target.closest('.x')) return closeModal();
+  const pk = e.target.closest('[data-pick]'); if (pk) { pickAlbum(+pk.dataset.pick); closeModal(); return; }
+  const gt = e.target.closest('[data-goto]'); if (gt) { openModal(gt.dataset.goto); return; }
+  if (e.target.id === 'copyMail') { navigator.clipboard?.writeText(LINKS.email).then(() => toast('copied ✓'), () => toast(LINKS.email)); }
+});
+addEventListener('keydown', e => { if (e.key === 'Escape' && modal.classList.contains('on')) closeModal(); });
+
+/* ---------- toasts for small props ---------- */
+const TOASTS = {
+  pennant: ['born & raised in Surabaya 🏙️', 'SBY represent'],
+  polaroid: ['first deploy: it worked on the second try', 'sempro, 3 nov 2026 — passed ✓'],
+  calendar: ['nov 2026: sempro ✓, built this room ✓', 'deadline? never heard of her'],
+  comic: ['BUG-MAN #404: the bug that only appears in production', 'spoiler: it was a missing semicolon'],
+  shoes: ['the ones i walk to campus in', 'one red, one black. on purpose.'],
+  robot0: ['beep. i am a retrieval agent.', 'query expanded ✓'],
+  robot1: ['beep boop. i only output valid JSON.', 'schema validated ✓'],
+  robot2: ['i hallucinate sometimes. sorry.', 'temperature too high, brb'],
+};
+const rnd = a => a[Math.floor(Math.random() * a.length)];
+
+/* ---------- click routing ---------- */
+function activate(el) {
+  if (el.dataset.open) { (el.dataset.open === 'crate' && el.id === 'floorVinyl') && wiggle(el); openModal(el.dataset.open); return; }
+  if (el.dataset.toast) { wiggle(el); toast(rnd(TOASTS[el.dataset.toast])); hideHint(); return; }
+  if (el.dataset.act === 'lights') { toggleNight(); return; }
+  if (el.dataset.act === 'skate') { el.classList.remove('kickflip'); void el.getBoundingClientRect(); el.classList.add('kickflip'); toast(rnd(['kickflip attempt #47: failed', 'still can\'t ollie. still trying.', 'it\'s mostly decoration tbh'])); hideHint(); return; }
+}
+function wiggle(el) { el.classList.remove('wiggle'); void el.getBoundingClientRect(); el.classList.add('wiggle'); }
+$('#scene').addEventListener('click', e => { const h = e.target.closest('.hot'); if (h) activate(h); });
+$('#scene').addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target.closest('.hot')) { e.preventDefault(); activate(e.target.closest('.hot')); } });
+
+/* ---------- wall colour, night, surprise ---------- */
+const WALLS = ['#e6dccb', '#b9c7b0', '#c4b8d6', '#2f3a55', '#d9a58f', '#1f1f24'];
+let wi = store.get('wall', 0) % WALLS.length;
+function applyWall() { document.documentElement.style.setProperty('--wall', WALLS[wi]); $('#swWall').style.background = WALLS[wi]; store.set('wall', wi); }
+applyWall();
+$('#bWall').onclick = () => { wi = (wi + 1) % WALLS.length; applyWall(); };
+function toggleNight(force) {
+  const on = document.body.classList.toggle('night', force);
+  $('#icL').textContent = on ? '☀' : '☾'; $('#lbL').textContent = on ? 'lights on' : 'lights off'; $('#lbL2').textContent = on ? 'day' : 'night';
+  toast(on ? 'lights off. lava lamp on. 🌙' : 'good morning ☀'); hideHint();
+}
+$('#bLights').onclick = () => toggleNight();
+$('#bSurprise').onclick = () => {
+  let n; do { n = Math.floor(Math.random() * WALLS.length); } while (n === wi); wi = n; applyWall();
+  confetti(); $$('svg .hot').forEach((h, i) => setTimeout(() => wiggle(h), i * 40));
+  pickAlbum(Math.floor(Math.random() * ALBUMS.length), true);
+};
+function confetti() {
+  const cols = ['#d8352a', '#2f63c4', '#ffd84d', '#9ff0a8', '#ff9ad5'];
+  for (let i = 0; i < 60; i++) { const d = document.createElement('i'); d.className = 'cf'; d.style.left = Math.random() * 100 + 'vw'; d.style.background = cols[i % 5]; d.style.animationDuration = 1.3 + Math.random() * 1.4 + 's'; document.body.appendChild(d); setTimeout(() => d.remove(), 3000); }
+}
+$('#gbtn').onclick = () => openModal('guide');
+
+/* ---------- hint ---------- */
+let hinted = false; function hideHint() { if (hinted) return; hinted = true; $('#hint').style.opacity = 0; }
+setTimeout(hideHint, 7000);
+
+/* ---------- mobile: start centred on the turntable ---------- */
+const vp = $('#vp');
+function centerPan() { if (vp.scrollWidth > vp.clientWidth) vp.scrollLeft = vp.scrollWidth * .57 - vp.clientWidth / 2; }
+requestAnimationFrame(() => { centerPan(); setTimeout(() => vp.addEventListener('scroll', hideHint, { passive: true }), 400); });
+
+/* ---------- TURNTABLE + SPOTIFY ---------- */
+let live = null, picked = null, embedOpen = false;
+const cur = () => picked || live;
+function trackEmbed(c) {
+  if (!c) return '';
+  if (c.kind === 'album') return `https://open.spotify.com/embed/album/${c.id}?utm_source=generator&theme=0`;
+  const m = (c.url || '').match(/track\/([A-Za-z0-9]+)/); return m ? `https://open.spotify.com/embed/track/${m[1]}?utm_source=generator&theme=0` : '';
+}
+function render() {
+  const c = cur(), spinning = !!(picked || (live && live.playing));
+  $('#vinyl').classList.toggle('on', spinning); $('#arm').classList.toggle('on', spinning); $('#led').classList.toggle('on', spinning);
+  $('#dkCv').classList.toggle('on', spinning);
+  if (c && c.cover) { $('#labelImg').src = c.cover; $('#dkImg').src = c.cover; }
+  const tag = $('#dkTag');
+  if (picked) { tag.textContent = '◆ from the crate'; tag.classList.add('pk'); }
+  else if (live) { tag.textContent = live.playing ? '● LIVE · on my Spotify' : '◌ last played'; tag.classList.remove('pk'); }
+  else { tag.textContent = '◌ turntable idle'; tag.classList.remove('pk'); }
+  $('#dkT').textContent = c ? c.title : 'nothing spinning';
+  $('#dkA').textContent = c ? c.artist : 'pick a record from the crate';
+  $('#dkOpen').href = c && c.url ? c.url : 'https://open.spotify.com';
+  $('#lcd').textContent = c ? `${spinning ? '▶' : '❚❚'} ${c.title.toUpperCase()} — ${c.artist.toUpperCase()}${picked ? '' : (live && live.playing ? '  ·  LIVE' : '  ·  LAST PLAYED')}` : 'NO SIGNAL — pick a record from the crate';
+  $('#liveBack').classList.toggle('on', !!(picked && live));
+  if (embedOpen) setEmbed(true);
+}
+function setEmbed(on) {
+  embedOpen = on; const box = $('#embed'), src = trackEmbed(cur());
+  if (on && src) {
+    const f = box.querySelector('iframe');
+    if (!f || f.dataset.src !== src) box.innerHTML = `<iframe data-src="${src}" src="${src}" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy" title="Spotify player"></iframe>`;
+    box.classList.add('on'); $('#dkPlay').textContent = '✕ hide';
+  } else { box.classList.remove('on'); box.innerHTML = ''; embedOpen = false; $('#dkPlay').textContent = '▶ play'; }
+}
+function pickAlbum(i, quiet) {
+  const a = ALBUMS[i]; picked = { kind: 'album', ...a };
+  $('#arm').classList.remove('on'); setTimeout(render, 250);
+  if (!quiet) { toast(`now spinning: ${a.title} — ${a.artist}`); setEmbed(true); }
+  render();
+}
+$('#dkPlay').onclick = () => { if (!cur()) { openModal('crate'); return; } setEmbed(!embedOpen); };
+$('#dkCrate').onclick = () => openModal('crate');
+$('#liveBack').onclick = () => { picked = null; render(); toast('back to live ●'); };
+$('#tt').addEventListener('click', () => { hideHint(); if (!cur()) { openModal('crate'); return; } setEmbed(!embedOpen); toast(embedOpen ? 'needle drop ✦ hit play on the player' : 'needle up'); });
+$('#tt').addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); $('#tt').click(); } });
+
+async function poll() {
+  try {
+    const r = await fetch(SPOTIFY_NOW, { cache: 'no-store' }); if (!r.ok) throw 0;
+    const j = await r.json();
+    live = j.title ? { kind: 'track', title: j.title, artist: j.artist, cover: j.cover, url: j.url, playing: !!j.playing } : null;
+  } catch (e) { live = live || null; }
+  render();
+}
+poll(); setInterval(poll, 30000);
+render();
+})();
+</script>
+</body>
+</html>
