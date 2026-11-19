@@ -13,6 +13,7 @@ Interactive bedroom portfolio of **Muhammad Indra Darmawan**, Fullstack Develope
 | Flip phone di lantai | Kontak |
 | Turntable / rak piringan / crate | Pengunjung memilih musik sendiri: ambil album dari crate atau paste link Spotify apa saja (lagu, album, playlist) → diputar lewat Spotify embed |
 | Lava lamp | Mode malam |
+| Poster & stiker band (Headphone Fest, Arctic Monkeys, Deftones, stiker di ranjang/nakas/skateboard/dinding/kabinet) | Memutar album band itu di turntable |
 
 Satu file `index.html` (HTML/CSS/JS + SVG), tanpa framework dan tanpa build step. Tidak butuh API key: musik diputar lewat Spotify embed, sedangkan judul dan cover untuk link yang di-paste diambil dari Spotify oEmbed.
 
